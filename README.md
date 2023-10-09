@@ -58,8 +58,6 @@ git clone https://github.com/≤github bruker>/terraform-app-runner.git
 Får du denne feilmeldingen ```bash: /terraform-app-runner: Permission denied``` - så glemte du å bytte ut <github bruker> med
 ditt eget Github brukernavn :-)
 
-![Alt text](img/clone.png  "a title")
-
 OBS Når du gjør ```git push``` senere og du skal autentisere deg, skal du bruke GitHub  brukernavn, og access token som passord,
 
 For å slippe å autentisere seg hele tiden kan man få git til å cache nøkler i et valgfritt antall sekunder på denne måten;
