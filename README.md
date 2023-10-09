@@ -18,11 +18,6 @@ Vi skal også se nærmere på mer avansert GitHub Actions: For eksempel;
 
 ## Lag en fork
 
-```
-Viktig!
-Hvis du allerede har laget en fork av dette repoet - må du enten slette din fork (ditt repo) eller oppdatere ditt repo så 
-du har siste versjon av repoet i din fork. 
-```
 Du må start med å lage en fork av dette repoet til din egen GitHub-konto.
 
 ![Alt text](img/fork.png  "a title")
