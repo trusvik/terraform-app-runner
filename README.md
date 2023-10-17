@@ -316,5 +316,5 @@ for å fortelle app runner hvilken container som skal deployes.
 
 ## Test
 
-* Kjør byggejobben manuelt førte gang gang. Det vil det lages en docker container som pushes til ECR repository. App runner vil lage en service
+* Når du pusher koden til ditt github repo første gang vil det lages en docker container som lastes opp til ditt ECR repository. Pipeline vil også kjøre terraform, og opprette en App runner service
 * Sjekk at det er dukket opp to container images i ECR. En med en tag som matcher git commit, og en som heter "latest".
