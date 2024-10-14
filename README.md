@@ -179,7 +179,7 @@ Terraform will perform the following actions:
 Plan: 1 to add, 0 to change, 0 to destroy.
 
 ```
-* 
+
 * Kjør terraform apply *uten å gi variabelnavn på kommandlinjen*, og se at Terraform lager en bucket med samme navn som defaultverdien for variabelen "bucket_name" 
 * Du må svare "yes" for å bekrefte, dette funker dårlig i feks GitHub actions, så prøv også derfor 
 
@@ -191,10 +191,10 @@ terraform apply --auto-approve
 
 * Hvis du slår på visning av skjulte filer i Cloud9 vil du nå se en ````.terraform```` katalog. Denne inneholder en terraform "provider" for AWS (Det som gjør at Terraform kan lage-, endre og slette infrastruktur i AWS) - Disse filene ble lastet ned på ```terraform init```
 * Når apply er ferdig, vil du se en terraform.tfstate fil i katalogen du kjørte terrafomr fra. Se på filen. Den inneholder informasjon om ECR repoet du opprettet.
+* Åpne state filen, se litt på innholdet
 * Slette denne filen, og kjøre terraform apply en gang til. Terraform prøver å opprette ECR repo på nytt, hvorfor?
-* Hint; fordi terraform ikke kan vite at denne allerede er oppprettet av Terraform.
 * Slik informasjon ligger i "state" filen til terraform som du nettopp slettet!
-* Gå til Amazon ECR-tjenesten i AWS, og slett ecr repo du lagde.
+* Gå til Amazon ECR-tjenesten i AWS, og slett det ECR repoet du lagde.
 
 Endre provider.tf ved å legge på en _backend_ blokk, slik at den ser omtrent slik ut, du må modifisere med egent student navn,
 
@@ -207,13 +207,12 @@ terraform {
     }
   }
   backend "s3" {
-    bucket = "pgr301-2021-terraform-state"
+    bucket = "pgr301-2024-terraform-state"
     key    = "<student-navn>/apprunner-lab.state"
-    region = "eu-north-1"
+    region = "eu-west-1"
   }
 }
 ```
-
 * Dette er mer robust ! Her forteller vi Terraform at state-informasjon skal lagres i S3, i en Bucket som ligger i Stockholm regionen, med et filnavn du selv bestemmer
   ved å endre "key"
 * For å starte med blank ark må du fjerne evt terraform.state, hele .terraform katalogen, og alle filer som starter med ````.terraform````
@@ -226,13 +225,13 @@ terraform plan
 terraform apply --auto-approve
 ```  
 
-Legg merke til at du nå ikke har noe state fil i Cloud9, men se i S3 at du har fått en fil i buckenten som heter; pgr301-2021-terraform-state
-og med objektnavnet du valgte. NB. For de ekstra observante, det er en backup av state filen din i .terraform katalogen du kan bruke hvis noen sletter state filen i s3 ved et uhell.
+* Legg merke til at du nå ikke har noe state fil i Cloud9. 
+* Gå til AWS tjenesten S3 og se i bucketeten ```pgr301-2024-terraform-state``` at du har fått en fil i buckenten som heter objektnavnet du valgte.
+  
+## Viktig ! Rydd opp 
 
-## Rydd opp 
-
-* Du skal ikke bruke bruke filer i terraform-demo mappen lenger. Slepp mappen for å unngå forvirring senere i laben.
-
+* Du skal ikke bruke bruke filer i terraform-demo mappen lenger. Slepp ```terraform-demo``` mappen for å unngå forvirring senere i laben!
+  
 ## AWS App runner & Terraform med GitHub actions
 
 ### Lag Repository secrets
@@ -247,7 +246,8 @@ og med objektnavnet du valgte. NB. For de ekstra observante, det er en backup av
       AWS_REGION: eu-west-1
 ```
 
-Vi skal nå se på hvordan vi kan få GitHub actions til å kjøre Terraform for oss. Det er par nye nyttige elementer i pipelinen.
+Vi skal nå se på hvordan vi kan få GitHub actions til å kjøre Terraform for oss. Et utgangspunkt for en workflow ligger i dette repoet. 
+Det er par nye nyttige elementer i pipelinen.
 
 Her ser vi et steg i en pipeline med en ```if``` - som bare skjer dersom det er en ```pull request``` som bygges, vi ser også at
 pipeline får lov til å _fortsette dersom dette steget feiler.
@@ -262,8 +262,8 @@ pipeline får lov til å _fortsette dersom dette steget feiler.
 
 Når noen gjør en Git push til *main* branch, kjører vi ```terraform apply``` med ett flag ```--auto-approve``` som gjør at terraform ikke
 spør om lov før den kjører.
-
 ```yaml
+
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve
@@ -276,7 +276,17 @@ Terraform trenger docker container som lages i en egen GitHub Actions jobb. Vi k
     needs: build_docker_image
 ```
 
-I rot-katalogen; Endre provider.tf 
+
+## Finn ditt ECR repository
+
+* Det er laget et ECR repository til hver student som en del av labmiljøet
+* Dette heter *studentnavn-private*
+* Gå til tjenesten ECR og sjekk at dette finnes
+
+## Gjør nødvendig endringer 
+
+* I rot-katalogen; Endre provider.tf 
+
 ```hcl
 backend "s3" {
     bucket = "pgr301-2021-terraform-state"
@@ -285,19 +295,9 @@ backend "s3" {
 }
 ```
 
-## Finn ditt ECR repository
+* se på workflow-filen. 
 
-* Det er laget et ECR repository til hver student som en del av labmiljøet
-* Dette heter *studentnavn-private*
-* Gå til tjenesten ECR og sjekk at dette finnes
-
-## Gjør nødvendig endringer i pipeline.yml
-
-
-Som dere ser er "glenn" hardkodet ganske mange steder, bruk ditt eget ECR repository.
-
-* Oppgave: Endre kodeblokken under slik at den *også* pusher en "latest" tag.
-* Husk at det må være samsvar mellom tag du lager med _docker build_ og det du bruker i _docker tag_ kommandoen.
+Som dere ser er "glenn" hardkodet ganske mange steder, bruk ditt eget ECR repository. Endre dette til ditt eget studentnavn
 
 ```sh
   docker build . -t hello
@@ -317,4 +317,7 @@ for å fortelle app runner hvilken container som skal deployes.
 ## Test
 
 * Når du pusher koden til ditt github repo første gang vil det lages en docker container som lastes opp til ditt ECR repository. Pipeline vil også kjøre terraform, og opprette en App runner service
-* Sjekk at det er dukket opp to container images i ECR. En med en tag som matcher git commit, og en som heter "latest".
+
+## Oppgaver
+
+* Når du bygger et container image; push to container images, ett som bruker github commit ($rev) - men også en tag som heter ````:latest````
