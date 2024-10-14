@@ -320,4 +320,4 @@ for å fortelle app runner hvilken container som skal deployes.
 
 ## Oppgaver
 
-* Når du bygger et container image; push to container images, ett som bruker github commit ($rev) - men også en tag som heter ````:latest````
+* Når du bygger et container image; push to container images, ett som bruker github commit ($rev) - men også en tag som heter latest
