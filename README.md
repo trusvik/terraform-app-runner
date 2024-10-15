@@ -180,7 +180,7 @@ Plan: 1 to add, 0 to change, 0 to destroy.
 
 ```
 
-* Kjør terraform apply *uten å gi variabelnavn på kommandlinjen*, og se at Terraform lager en bucket med samme navn som defaultverdien for variabelen "bucket_name" 
+* Kjør terraform apply *uten å gi variabelnavn på kommandlinjen*, og se at Terraform lager ecr_repo med defaultverdien for variabelen "repo_name" 
 * Du må svare "yes" for å bekrefte, dette funker dårlig i feks GitHub actions, så prøv også derfor 
 
 ```sh
